@@ -60,4 +60,4 @@ jobs:
         with:
           app-name: 'ResponderApi'
           slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_5D1870905BE54453929BF6E15C69B96C }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_E9A1134DD6E7446199EED5A2FA10D435 }}
