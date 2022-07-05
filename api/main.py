@@ -1,41 +1,54 @@
+from fastapi import FastAPI, Path
 from typing import Optional
-
-from fastapi import FastAPI
 from pydantic import BaseModel
 
 app = FastAPI()
 
-fakedb = []
+class Responder(BaseModel):
+    name: str
+    location: str
+    body_temp: int
+    blood_oxygen: int
 
-class Course(BaseModel):
-    id:int
-    name:str
-    price:float
-    is_early_bird: Optional[bool] = None
- 
+# employees information
+responders = {
+    1 : {"name": "John Doe","location": "Somewhere","body_temp": 98,"blood_oxygen": 99},
+    2 : {"name": "Mickey Mouse","location": "Disney","body_temp": 99,"blood_oxygen": 100},
+    3 : {"name": "Scooby Doo","location": "Dog house","body_temp": 96,"blood_oxygen": 98.5},
+    4 : {"name": "Lighning McQueen","location": "Racetrack","body_temp": 104,"blood_oxygen": 97},
+    5 : {"name": "Olaf","location": "Arendelle","body_temp": 20,"blood_oxygen": 10},
+    6 : {"name": "Buzz Lightyear","location": "Sunnyside Daycare","body_temp": 98,"blood_oxygen": 88}
+}
 
+# Create an endpoint
 @app.get("/")
-def get_home():
-    return {"message": "helloworld"}
+def home():
+    return {"name" : "Telemetry Data App", "version": "1.0.0"}
 
+# Responders REST APIs
+@app.get("/responders")
+def allResponders():
+    return responders
 
-@app.get("/courses")
-def get_courses():
-    return fakedb
+@app.get("/responders/by-id/{respId}")
+def respById(respId: int = Path(None, description = "Enter valid responder id", gt = 0, lt = len(responders) + 1)):
+    if(respId in responders):
+        return responders[respId]
+    else:
+        raise Exception("Responder not exist with given id " + str(respId))
 
+@app.get("/responders/by-name")
+def empByName(name: Optional[str] = None):
+    if name == None:
+        return {"message" : "no input provided"}
+    for respId in responders:
+        if responders[respId]["name"] == name:
+            return responders[respId]
+    return {"message" : "Not found"}
 
-@app.get("/courses/{course_id}")
-def get_course(course_id:int):
-    course = course_id - 1
-    return fakedb[course]
-
-
-@app.post("/courses")
-def add_course(course: Course):
-    fakedb.append(course.dict())
-    return fakedb[-1]
-
-@app.delete("/courses")
-def delete_course(course_id: int):
-    fakedb.pop(course_id - 1)
-    return {"message": "deleted successfully"}    
+@app.post("/responders")
+def createEmployee(resp: Responder):
+    noOfResps = len(responders)
+    newId = noOfResps + 1
+    responders[newId] = resp
+    return {"id" : newId, "name" : resp.name}
